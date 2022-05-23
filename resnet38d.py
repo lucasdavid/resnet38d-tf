@@ -1,20 +1,21 @@
 import tensorflow as tf
 from keras import Model
-from keras.layers import (
-  Activation, BatchNormalization, Conv2D, Dropout,
-  GlobalAveragePooling2D, GlobalMaxPooling2D, Add
-)
+from keras.layers import (Activation, Add, BatchNormalization, Conv2D, Dropout,
+                          GlobalAveragePooling2D, GlobalMaxPooling2D)
+from keras.utils import data_utils
 
 ALLOWED_POOLING = ('avg', 'max', None)
 
 WEIGHTS = {
   'imagenet': {
-    'classes': 1000,
-    'filename': 'resnet38d_imagenet.h5',
+    'file_name': 'resnet38d_imagenet.h5',
+    'file_hash': 'cf33dc7e57150679ecf288033c1150dec4b08eed83d291c02c9fa341596d1d9b',
+    'url': 'https://github.com/lucasdavid/resnet38d-tf/releases/download/0.0.1/resnet38d_imagenet.h5',
   },
   'voc2012': {
-    'classes': 20,
-    'filename': 'resnet38d_voc2012.h5',
+    'file_name': 'resnet38d_voc2012.h5',
+    'file_hash': 'a33cbbdca220cd35c011c1a58936e448a2b1b32833d1b4114b826496d972a749',
+    'url': 'https://github.com/lucasdavid/resnet38d-tf/releases/download/0.0.1/resnet38d_voc2012.h5',
   },
 }
 
@@ -153,19 +154,25 @@ def ResNet38d(
 
   if pooling:
     if pooling == 'avg':
-      x = GlobalAveragePooling2D(name='avg_pool')(x)
+      x = GlobalAveragePooling2D(name='predictions')(x)
     else:
-      x = GlobalMaxPooling2D(name='max_pool')(x)
+      x = GlobalMaxPooling2D(name='predictions')(x)
 
   model = Model(input_tensor, x, name=name)
 
   if weights is not None:
     if weights not in WEIGHTS:
-      filename = weights
+      weights_path = weights
     else:
       config = WEIGHTS[weights]
-      filename = config['filename']
 
-    model.load_weights(filename)
+      weights_path = data_utils.get_file(
+        config['file_name'],
+        config['url'],
+        cache_subdir='models',
+        file_hash=config['file_hash']
+      )
+
+    model.load_weights(weights_path)
 
   return model
