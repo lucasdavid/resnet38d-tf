@@ -3,6 +3,8 @@ Tensorflow implementation for ResNet38 dilated, with weights converted from the 
 
 ### Pretrained Weights
 
+Weights were ported from mxnet and Torch using the conversion scripts in [tools](/tools).
+
   \# | Dataset | Source
 ---- | -------  | ------
   1 | Imagenet | [itijyou/ademxapp](https://github.com/itijyou/ademxapp)
