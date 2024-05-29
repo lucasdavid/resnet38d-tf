@@ -4,8 +4,7 @@ import tensorflow as tf
 from keras import Model
 from keras.layers import (Activation, Add, BatchNormalization, Conv2D, Dropout,
                           GlobalAveragePooling2D, GlobalMaxPooling2D)
-from keras.utils import data_utils
-from keras.utils.layer_utils import get_source_inputs
+from keras.utils import get_file, get_source_inputs
 
 S = Union[int, Tuple[int, int]]
 
@@ -100,13 +99,13 @@ def bottleneck(
 def ResNet38d(
   input_tensor: Optional[Union[tf.Tensor, tf.keras.Input]] = None,
   input_shape: Tuple[int, int, int] = (448, 448, 3),
-  classes: int = 20,
+  classes: int = 1000,
   include_top: int = True,
-  weights: str = 'voc2012',
+  weights: str = 'imagenet',
   dropout_rate: float = 0,
   dilation: Optional[S] = (2, 4),
   pooling: str = 'avg',
-  activation: str = 'sigmoid',
+  activation: str = 'softmax',
   name: str = 'resnet38d',
 ):
   if pooling not in ALLOWED_POOLING:
@@ -160,7 +159,7 @@ def ResNet38d(
     else:
       x = GlobalMaxPooling2D(name='max_pool')(x)
 
-  if activation:
+  if include_top and activation:
     x = Activation(activation, name='predictions')(x)
 
   model = Model(get_source_inputs(input_tensor), x, name=name)
@@ -171,7 +170,7 @@ def ResNet38d(
     else:
       config = WEIGHTS[weights]
 
-      weights_path = data_utils.get_file(
+      weights_path = get_file(
         config['file_name'],
         config['url'],
         cache_subdir='models',
